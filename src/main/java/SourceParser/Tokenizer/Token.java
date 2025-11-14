@@ -12,4 +12,8 @@ public class Token {
         this.line = line;
         this.column = column;
     }
+
+    public String getTokenPositionInfo() {
+        return "(" + type + ", " + value + ", " + line + ":" + column + ")";
+    }
 }
