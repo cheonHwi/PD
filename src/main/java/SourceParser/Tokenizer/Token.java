@@ -13,6 +13,10 @@ public class Token {
         this.column = column;
     }
 
+    public TokenType getType() {
+        return type;
+    }
+
     public String getTokenPositionInfo() {
         return "(" + type + ", " + value + ", " + line + ":" + column + ")";
     }
