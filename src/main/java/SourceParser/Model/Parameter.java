@@ -8,4 +8,9 @@ public class Parameter {
         this.type = type;
         this.name = name;
     }
+
+    @Override
+    public String toString() {
+        return type + " " + name;
+    }
 }
