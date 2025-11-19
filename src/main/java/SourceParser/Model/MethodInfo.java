@@ -2,6 +2,7 @@ package SourceParser.Model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MethodInfo {
     String methodName;
@@ -35,15 +36,21 @@ public class MethodInfo {
         return parameters;
     }
 
-    public List<MethodCall> getMethodCalls() {
-        return methodCalls;
-    }
-
-    public int getLineNumber() {
-        return lineNumber;
-    }
-
     public void setLineNumber(int lineNumber) {
         this.lineNumber = lineNumber;
+    }
+
+    @Override
+    public String toString() {
+        String methodSignature = "";
+
+        if(!parameters.isEmpty()) {
+            methodSignature = parameters.stream()
+                    .map(Parameter::toString)
+                    .collect(Collectors.joining(", "));
+        }
+
+
+        return String.format("%s %s(%s)", methodName, returnType, methodSignature);
     }
 }
