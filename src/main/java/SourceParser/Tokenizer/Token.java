@@ -17,6 +17,14 @@ public class Token {
         return type;
     }
 
+    public String getValue() {
+        return value;
+    }
+
+    public int getLine() {
+        return line;
+    }
+
     @Override
     public String toString() {
         return String.format("Token(Type: %s, Keyword: %s, Position: %s:%s)", type, value, line, column);
