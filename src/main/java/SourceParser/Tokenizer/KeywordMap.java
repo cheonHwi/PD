@@ -32,6 +32,7 @@ public class KeywordMap {
         KEYWORDS.put("char", TokenType.CHAR);
         KEYWORDS.put("boolean", TokenType.BOOLEAN);
         KEYWORDS.put("void", TokenType.VOID);
+        KEYWORDS.put("String", TokenType.STRING);
 
         // 제어문
         KEYWORDS.put("if", TokenType.IF);
