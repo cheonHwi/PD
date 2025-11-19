@@ -32,4 +32,20 @@ public class Lexer {
     public boolean isAtEnd() {
         return position >= tokens.size() - 1 && tokens.get(position).getType() == TokenType.EOF;
     }
+
+    public boolean check(TokenType type) {
+        if (isAtEnd()) return false;
+        return getCurrentToken().getType() == type;
+    }
+
+
+    public boolean match(TokenType... types) {
+        for (TokenType type : types) {
+            if (check(type)) {
+                moveForward();
+                return true;
+            }
+        }
+        return false;
+    }
 }
