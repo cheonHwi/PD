@@ -1,6 +1,6 @@
 package SourceParser.Model;
 
-class Parameter {
+public class Parameter {
     String type;
     String name;
 
