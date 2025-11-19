@@ -1,9 +1,9 @@
-package SourceParser.classinfo;
+package SourceParser.Model;
 
 import java.util.List;
 
 public class MethodInfo {
-    String MethodName;
+    String methodName;
     String returnType;
     List<Parameter> parameters;
     int lineNumber;

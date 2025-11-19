@@ -1,4 +1,4 @@
-package SourceParser.classinfo;
+package SourceParser.Model;
 
 class Parameter {
     String type;

@@ -1,4 +1,4 @@
-package SourceParser.classinfo;
+package SourceParser.Model;
 
 import java.util.List;
 
