@@ -1,3 +1,4 @@
+import SourceParser.Lexer.Lexer;
 import SourceParser.Tokenizer.Token;
 import SourceParser.Tokenizer.Tokenizer;
 
@@ -6,11 +7,13 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
         String code = "public static void main(String[] args) {}";
-        Tokenizer tokenizer = new Tokenizer(code);
-        List<Token> tokens = tokenizer.tokenize();
 
-        for (Token token : tokens) {
-            System.out.println(token.getTokenPositionInfo());
+        Lexer lexer = new Lexer(code);
+
+        while (!lexer.isAtEnd()) {
+            Token token = lexer.getCurrentToken();
+            System.out.println(token);
+            lexer.moveForward();
         }
     }
 }
