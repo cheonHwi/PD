@@ -2,6 +2,7 @@ package SourceParser.Lexer;
 
 import SourceParser.Tokenizer.Token;
 import SourceParser.Tokenizer.TokenType;
+import SourceParser.Tokenizer.Tokenizer;
 
 import java.util.List;
 
@@ -9,8 +10,9 @@ public class Lexer {
     private final List<Token> tokens;
     private int position;
 
-    public Lexer(List<Token> tokens) {
-        this.tokens = tokens;
+    public Lexer(String code) {
+        Tokenizer tokenizer = new Tokenizer(code);
+        this.tokens = tokenizer.tokenize();
         this.position = 0;
     }
 
