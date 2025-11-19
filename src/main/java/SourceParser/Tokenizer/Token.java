@@ -13,6 +13,10 @@ public class Token {
         this.column = column;
     }
 
+    public TokenType getType() {
+        return type;
+    }
+
     @Override
     public String toString() {
         return String.format("Token(Type: %s, Keyword: %s, Position: %s:%s)", type, value, line, column);
