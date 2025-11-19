@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Tokenizer {
-    private String source;
+    private final String source;
     private int position;
     private int line;
     private int column;
-    private List<Token> tokens;
+    private final List<Token> tokens;
 
     public Tokenizer(String source) {
         this.source = source;
@@ -48,6 +48,7 @@ public class Tokenizer {
             case '%': addToken(TokenType.PERCENT, "%"); break;
             case '=': addToken(TokenType.ASSIGN, "="); break;
             case '/': addToken(TokenType.SLASH, "/"); break;
+            case '?': addToken(TokenType.QUESTION, "?"); break;
 
             case ' ':
             case '\r':
