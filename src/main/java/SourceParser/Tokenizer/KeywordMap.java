@@ -23,6 +23,7 @@ public class KeywordMap {
         KEYWORDS.put("enum", TokenType.ENUM);
         KEYWORDS.put("extends", TokenType.EXTENDS);
         KEYWORDS.put("implements", TokenType.IMPLEMENTS);
+        KEYWORDS.put("super", TokenType.SUPER);
 
         // 타입
         KEYWORDS.put("int", TokenType.INT);

@@ -2,8 +2,10 @@ package SourceParser.Model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MethodInfo {
+    String methodAccessModifier;
     String methodName;
     String returnType;
     List<Parameter> parameters;
@@ -13,6 +15,10 @@ public class MethodInfo {
     public MethodInfo() {
         this.parameters = new ArrayList<>();
         this.methodCalls = new ArrayList<>();
+    }
+
+    public void setMethodAccessModifier(String methodAccessModifier) {
+        this.methodAccessModifier = methodAccessModifier;
     }
 
     public String getMethodName() {
@@ -35,15 +41,21 @@ public class MethodInfo {
         return parameters;
     }
 
-    public List<MethodCall> getMethodCalls() {
-        return methodCalls;
-    }
-
-    public int getLineNumber() {
-        return lineNumber;
-    }
-
     public void setLineNumber(int lineNumber) {
         this.lineNumber = lineNumber;
+    }
+
+    @Override
+    public String toString() {
+        String methodSignature = "";
+
+        if(!parameters.isEmpty()) {
+            methodSignature = parameters.stream()
+                    .map(Parameter::toString)
+                    .collect(Collectors.joining(", "));
+        }
+
+
+        return String.format("%s %s %s(%s)", methodAccessModifier, returnType, methodName, methodSignature);
     }
 }

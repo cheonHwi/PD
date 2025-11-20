@@ -38,7 +38,6 @@ public class Lexer {
         return getCurrentToken().getType() == type;
     }
 
-
     public boolean match(TokenType... types) {
         for (TokenType type : types) {
             if (check(type)) {
@@ -47,5 +46,18 @@ public class Lexer {
             }
         }
         return false;
+    }
+
+    public void skipAnyOf(TokenType... types) {
+        while (matchesAny(types) != null) {
+            moveForward();
+        }
+    }
+
+    public Token matchesAny(TokenType... types) {
+        for (TokenType type : types) {
+            if (check(type)) return getCurrentToken();
+        }
+        return null;
     }
 }
