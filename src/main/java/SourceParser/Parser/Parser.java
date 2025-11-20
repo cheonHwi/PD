@@ -10,7 +10,7 @@ public class Parser {
         this.methodParser = new MethodParser(lexer);
     }
 
-    public MethodInfo parserMethodSignature() {
+    public MethodInfo getMethodInfo() {
         return methodParser.parserMethodSignature();
     }
 }
