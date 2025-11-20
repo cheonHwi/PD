@@ -16,6 +16,14 @@ public class Lexer {
         this.position = 0;
     }
 
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
+    }
+
     public Token getCurrentToken() {
         if (isAtEnd()) return tokens.getLast();
         return tokens.get(position);
