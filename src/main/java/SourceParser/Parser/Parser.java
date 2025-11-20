@@ -11,6 +11,7 @@ import java.util.List;
 
 public class Parser {
     private final Lexer lexer;
+    private String className;
     private final MethodParser methodParser;
 
     public Parser(Lexer lexer) {
@@ -36,13 +37,17 @@ public class Parser {
 
         classInfo.setModifiers(getClassModifiers());
 
-        if (!lexer.check(TokenType.CLASS)) {
-            throw new RuntimeException("Expected 'class' keyword at line "
+        Token classType = lexer.matchesAny(TokenType.CLASS, TokenType.ENUM, TokenType.INTERFACE);
+        if (classType == null) {
+            throw new RuntimeException("Expected 'class', 'enum', or 'interface' keyword at line "
                     + lexer.getCurrentToken().getLine());
         }
+
+        classInfo.setClassType(classType.getValue());
         lexer.moveForward();
 
-        classInfo.setClassName(lexer.getCurrentToken().getValue());
+        this.className = lexer.getCurrentToken().getValue();
+        classInfo.setClassName(this.className);
         lexer.moveForward();
 
         if (lexer.check(TokenType.EXTENDS)) {
@@ -157,14 +162,21 @@ public class Parser {
             );
 
             if (accessModifier != null) {
-                MethodInfo method = methodParser.parserMethodSignature();
-                methods.add(method);
-
-                skipMethodBody();
+                if(isConstructor()) {
+                    skipConstructor();
+                } else if (hasParenthesisAhead()) {
+                    MethodParser methodParser = new MethodParser(lexer);
+                    MethodInfo method = methodParser.parserMethodSignature();
+                    methods.add(method);
+                    skipMethodBody();
+                } else {
+                    skipToSemicolon();
+                }
             } else {
                 lexer.moveForward();
             }
         }
+
         return methods;
     }
 
@@ -184,5 +196,75 @@ public class Parser {
             }
             lexer.moveForward();
         }
+    }
+
+    private boolean hasParenthesisAhead() {
+        int savedPosition = lexer.getPosition();
+        boolean isMethod = false;
+
+        while (!lexer.isAtEnd()) {
+            if (lexer.check(TokenType.ASSIGN)) {
+                isMethod = false;
+                break;
+            }
+
+            if (lexer.check(TokenType.LPAREN)) {
+                isMethod = true;
+                break;
+            }
+
+            if (lexer.check(TokenType.SEMICOLON) || lexer.check(TokenType.LBRACE)) {
+                break;
+            }
+
+            lexer.moveForward();
+        }
+
+        lexer.setPosition(savedPosition);
+        return isMethod;
+    }
+
+    private void skipToSemicolon() {
+        while (!lexer.check(TokenType.SEMICOLON) && !lexer.isAtEnd()) {
+            lexer.moveForward();
+        }
+        if (lexer.check(TokenType.SEMICOLON)) {
+            lexer.moveForward();
+        }
+    }
+
+    private boolean isConstructor() {
+        int savedPosition = lexer.getPosition();
+        boolean isConstructor = false;
+
+        lexer.moveForward();
+
+        if (lexer.getCurrentToken().getValue().equals(className)) {
+            lexer.moveForward();
+            if (lexer.check(TokenType.LPAREN)) {
+                isConstructor = true;
+            }
+        }
+
+        lexer.setPosition(savedPosition);
+        return isConstructor;
+    }
+
+    private void skipConstructor() {
+        lexer.moveForward();
+
+        lexer.moveForward();
+
+        if (lexer.check(TokenType.LPAREN)) {
+            lexer.moveForward();
+            int parenCount = 1;
+            while (parenCount > 0 && !lexer.isAtEnd()) {
+                if (lexer.check(TokenType.LPAREN)) parenCount++;
+                else if (lexer.check(TokenType.RPAREN)) parenCount--;
+                lexer.moveForward();
+            }
+        }
+
+        skipMethodBody();
     }
 }
