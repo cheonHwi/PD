@@ -9,6 +9,14 @@ public class Parameter {
         this.name = name;
     }
 
+    public String getType() {
+        return type;
+    }
+
+    public String getName() {
+        return name;
+    }
+
     @Override
     public String toString() {
         return type + " " + name;
