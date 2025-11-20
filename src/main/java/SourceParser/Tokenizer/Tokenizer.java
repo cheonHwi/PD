@@ -40,7 +40,6 @@ public class Tokenizer {
             case '>': addToken(TokenType.GT, ">"); break;
             case ',': addToken(TokenType.COMMA, ","); break;
             case ';': addToken(TokenType.SEMICOLON, ";"); break;
-            case '.': addToken(TokenType.DOT, "."); break;
             case ':': addToken(TokenType.COLON, ":"); break;
             case '+': addToken(TokenType.PLUS, "+"); break;
             case '-': addToken(TokenType.MINUS, "-"); break;
@@ -49,6 +48,17 @@ public class Tokenizer {
             case '=': addToken(TokenType.ASSIGN, "="); break;
             case '/': addToken(TokenType.SLASH, "/"); break;
             case '?': addToken(TokenType.QUESTION, "?"); break;
+
+            case '.':
+                if (peek() == '.' && peekNext() == '.') {
+                    addToken(TokenType.VARARGS, "...");
+                    nextChar();
+                    nextChar();
+                } else {
+                    addToken(TokenType.DOT, ".");
+                }
+                break;
+
 
             case ' ':
             case '\r':
@@ -88,6 +98,11 @@ public class Tokenizer {
     private char peek() {
         if (isAtEnd()) return '\0';
         return source.charAt(position);
+    }
+
+    private char peekNext() {
+        if (position + 1 >= source.length()) return '\0';
+        return source.charAt(position + 1);
     }
 
     private boolean isAtEnd() {
