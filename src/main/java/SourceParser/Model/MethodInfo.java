@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class MethodInfo {
+    String methodAccessModifier;
     String methodName;
     String returnType;
     List<Parameter> parameters;
@@ -14,6 +15,10 @@ public class MethodInfo {
     public MethodInfo() {
         this.parameters = new ArrayList<>();
         this.methodCalls = new ArrayList<>();
+    }
+
+    public void setMethodAccessModifier(String methodAccessModifier) {
+        this.methodAccessModifier = methodAccessModifier;
     }
 
     public String getMethodName() {
@@ -51,6 +56,6 @@ public class MethodInfo {
         }
 
 
-        return String.format("%s %s(%s)", methodName, returnType, methodSignature);
+        return String.format("%s %s %s(%s)", methodAccessModifier, returnType, methodName, methodSignature);
     }
 }
