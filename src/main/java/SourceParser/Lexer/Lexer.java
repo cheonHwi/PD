@@ -49,15 +49,15 @@ public class Lexer {
     }
 
     public void skipAnyOf(TokenType... types) {
-        while (matchesAny(types)) {
+        while (matchesAny(types) != null) {
             moveForward();
         }
     }
 
-    private boolean matchesAny(TokenType... types) {
+    public Token matchesAny(TokenType... types) {
         for (TokenType type : types) {
-            if (check(type)) return true;
+            if (check(type)) return getCurrentToken();
         }
-        return false;
+        return null;
     }
 }
