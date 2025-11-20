@@ -8,7 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ParserTest {
+public class MethodParserTest {
 
     @Test
     @DisplayName("파서 간단한 메서드 시그니처 파싱 검증")
