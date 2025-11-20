@@ -58,6 +58,11 @@ public class MethodParser {
         while (!lexer.check(TokenType.RPAREN)) {
             String paramType = parseType();
 
+            if (lexer.check(TokenType.VARARGS)) {
+                paramType += "...";
+                lexer.moveForward();
+            }
+
             Token nameToken = lexer.getCurrentToken();
             String paramName = nameToken.getValue();
             lexer.moveForward();
