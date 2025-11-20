@@ -17,6 +17,10 @@ public class MethodInfo {
         this.methodCalls = new ArrayList<>();
     }
 
+    public String getMethodAccessModifier() {
+        return methodAccessModifier;
+    }
+
     public void setMethodAccessModifier(String methodAccessModifier) {
         this.methodAccessModifier = methodAccessModifier;
     }
