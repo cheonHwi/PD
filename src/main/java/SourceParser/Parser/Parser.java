@@ -2,9 +2,11 @@ package SourceParser.Parser;
 
 import SourceParser.Lexer.Lexer;
 import SourceParser.Model.ClassInfo;
+import SourceParser.Model.MethodCall;
 import SourceParser.Model.MethodInfo;
 import SourceParser.Tokenizer.Token;
 import SourceParser.Tokenizer.TokenType;
+import SourceParser.MethodCallTracker.MethodCallTracker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -162,13 +164,20 @@ public class Parser {
             );
 
             if (accessModifier != null) {
-                if(isConstructor()) {
+                if (isConstructor(className)) {
                     skipConstructor();
                 } else if (hasParenthesisAhead()) {
+                    // 메서드 파싱
                     MethodParser methodParser = new MethodParser(lexer);
                     MethodInfo method = methodParser.parserMethodSignature();
+
+                    // 메서드 호출 추적
+                    MethodCallTracker tracker = new MethodCallTracker(lexer);
+                    List<MethodCall> calls = tracker.trackMethodCalls();
+                    calls.forEach(call -> method.getMethodCalls().add(call));
+
                     methods.add(method);
-                    skipMethodBody();
+
                 } else {
                     skipToSemicolon();
                 }
@@ -176,6 +185,7 @@ public class Parser {
                 lexer.moveForward();
             }
         }
+
 
         return methods;
     }
@@ -204,7 +214,6 @@ public class Parser {
 
         while (!lexer.isAtEnd()) {
             if (lexer.check(TokenType.ASSIGN)) {
-                isMethod = false;
                 break;
             }
 
@@ -233,7 +242,7 @@ public class Parser {
         }
     }
 
-    private boolean isConstructor() {
+    private boolean isConstructor(String className) {
         int savedPosition = lexer.getPosition();
         boolean isConstructor = false;
 

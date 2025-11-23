@@ -5,33 +5,33 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ClassInfo {
-    String accessModifier;
-    List<String> modifiers;
-    String className;
-    String classType;
-    String packageName;
-    List<String> imports;
-    String extendsClass;
-    List<String> implementsList;
-    List<MethodInfo> methods;
+    private String filePath;
+    private String packageName;
+    private String className;
+    private String classType;
+    private String accessModifier;
+    private List<String> modifiers;
+    private String extendsClass;
+    private List<String> implementsList;
+    private List<String> imports;
+    private List<MethodInfo> methods;
+    private List<String> dependencies;
 
     public ClassInfo() {
-        this.imports = new ArrayList<>();
-        this.methods = new ArrayList<>();
         this.modifiers = new ArrayList<>();
         this.implementsList = new ArrayList<>();
+        this.imports = new ArrayList<>();
+        this.methods = new ArrayList<>();
+        this.dependencies = new ArrayList<>();
     }
 
-    public String getClassName() {
-        return className;
+    // Getters and Setters
+    public String getFilePath() {
+        return filePath;
     }
 
-    public void setClassName(String className) {
-        this.className = className;
-    }
-
-    public void setClassType(String classType) {
-        this.classType = classType;
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
     }
 
     public String getPackageName() {
@@ -42,6 +42,22 @@ public class ClassInfo {
         this.packageName = packageName;
     }
 
+    public String getClassType() {
+        return classType;
+    }
+
+    public void setClassType(String classType) {
+        this.classType = classType;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
     public String getAccessModifier() {
         return accessModifier;
     }
@@ -50,12 +66,12 @@ public class ClassInfo {
         this.accessModifier = accessModifier;
     }
 
-    public void setModifiers(List<String> modifiers) {
-        this.modifiers = modifiers;
+    public List<String> getModifiers() {
+        return modifiers;
     }
 
-    public List<String> getImports() {
-        return imports;
+    public void setModifiers(List<String> modifiers) {
+        this.modifiers = modifiers;
     }
 
     public String getExtendsClass() {
@@ -70,21 +86,46 @@ public class ClassInfo {
         return implementsList;
     }
 
+    public void setImplementsList(List<String> implementsList) {
+        this.implementsList = implementsList;
+    }
+
+    public List<String> getImports() {
+        return imports;
+    }
+
+    public void setImports(List<String> imports) {
+        this.imports = imports;
+    }
+
     public List<MethodInfo> getMethods() {
         return methods;
+    }
+
+    public void setMethods(List<MethodInfo> methods) {
+        this.methods = methods;
+    }
+
+    public List<String> getDependencies() {
+        return dependencies;
+    }
+
+    public void setDependencies(List<String> dependencies) {
+        this.dependencies = dependencies;
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("ClassInfo {\n");
+        sb.append("{\n");
         appendPackage(sb);
         appendClassDeclaration(sb);
         appendExtends(sb);
         appendImplements(sb);
         appendImports(sb);
         appendMethods(sb);
+        appendDependencies(sb);
         sb.append("}");
 
         return sb.toString();
@@ -92,85 +133,102 @@ public class ClassInfo {
 
     private void appendPackage(StringBuilder sb) {
         if (packageName != null && !packageName.isEmpty()) {
-            sb.append("  package: ").append(packageName).append("\n");
+            sb.append("  \"package\": \"").append(packageName).append("\",\n");
         }
     }
 
     private void appendClassDeclaration(StringBuilder sb) {
-        sb.append("  class: ").append(buildClassDeclaration()).append("\n");
+        sb.append("  \"className\": \"").append(className).append("\"");
+
+        if (accessModifier != null && !accessModifier.equals("default")) {
+            sb.append(",\n  \"accessModifier\": \"").append(accessModifier).append("\"");
+        }
+
+        if (!modifiers.isEmpty()) {
+            sb.append(",\n  \"modifiers\": [");
+            sb.append(modifiers.stream()
+                    .map(m -> "\"" + m + "\"")
+                    .collect(Collectors.joining(", ")));
+            sb.append("]");
+        }
     }
 
     private void appendExtends(StringBuilder sb) {
         if (extendsClass != null && !extendsClass.isEmpty()) {
-            sb.append("  extends: ").append(extendsClass).append("\n");
+            sb.append(",\n  \"extends\": \"").append(extendsClass).append("\"");
         }
     }
 
     private void appendImplements(StringBuilder sb) {
         if (!implementsList.isEmpty()) {
-            sb.append("  implements: ")
-                    .append(String.join(", ", implementsList))
-                    .append("\n");
+            sb.append(",\n  \"implements\": [");
+            sb.append(implementsList.stream()
+                    .map(i -> "\"" + i + "\"")
+                    .collect(Collectors.joining(", ")));
+            sb.append("]");
         }
     }
 
     private void appendImports(StringBuilder sb) {
         if (imports.isEmpty()) return;
 
-        sb.append("  imports: [\n");
-        imports.forEach(imp -> sb.append("    ").append(imp).append("\n"));
-        sb.append("  ]\n");
+        sb.append(",\n  \"imports\": [\n");
+        sb.append(imports.stream()
+                .map(imp -> "    \"" + imp + "\"")
+                .collect(Collectors.joining(",\n")));
+        sb.append("\n  ]");
     }
 
     private void appendMethods(StringBuilder sb) {
         if (methods.isEmpty()) return;
 
-        sb.append("  methods: [\n");
-        methods.forEach(method ->
-                sb.append("    ").append(buildMethodSignature(method)).append("\n")
-        );
-        sb.append("  ]\n");
+        sb.append(",\n  \"methods\": [\n");
+        sb.append(methods.stream()
+                .map(this::buildMethodJson)
+                .collect(Collectors.joining(",\n")));
+        sb.append("\n  ]");
     }
 
-    private String buildClassDeclaration() {
-        StringBuilder sb = new StringBuilder();
+    private void appendDependencies(StringBuilder sb) {
+        if (dependencies.isEmpty()) return;
 
-        if (accessModifier != null && !accessModifier.equals("default")) {
-            sb.append(accessModifier).append(" ");
-        }
-
-        sb.append(classType).append(" ");
-
-        if (!modifiers.isEmpty()) {
-            sb.append(String.join(" ", modifiers)).append(" ");
-        }
-
-        sb.append(className);
-
-        return sb.toString();
+        sb.append(",\n  \"dependencies\": [");
+        sb.append(dependencies.stream()
+                .map(d -> "\"" + d + "\"")
+                .collect(Collectors.joining(", ")));
+        sb.append("]");
     }
 
-    private String buildMethodSignature(MethodInfo method) {
+    private String buildMethodJson(MethodInfo method) {
         StringBuilder sb = new StringBuilder();
+        sb.append("    {\n");
+        sb.append("      \"name\": \"").append(method.getMethodName()).append("\",\n");
 
         if (method.getMethodAccessModifier() != null) {
-            sb.append(method.getMethodAccessModifier()).append(" ");
+            sb.append("      \"accessModifier\": \"").append(method.getMethodAccessModifier()).append("\",\n");
         }
 
-        sb.append(method.getReturnType())
-                .append(" ")
-                .append(method.getMethodName())
-                .append("(");
+        sb.append("      \"returnType\": \"").append(method.getReturnType()).append("\"");
 
         if (!method.getParameters().isEmpty()) {
-            String params = method.getParameters().stream()
-                    .map(p -> p.getType() + " " + p.getName())
-                    .collect(Collectors.joining(", "));
-            sb.append(params);
+            sb.append(",\n      \"parameters\": [");
+            sb.append(method.getParameters().stream()
+                    .map(p -> "{\"type\": \"" + p.getType() + "\", \"name\": \"" + p.getName() + "\"}")
+                    .collect(Collectors.joining(", ")));
+            sb.append("]");
         }
 
-        sb.append(")");
+        if (!method.getMethodCalls().isEmpty()) {
+            sb.append(",\n      \"calls\": [\n");
+            sb.append(method.getMethodCalls().stream()
+                    .map(call -> "        {\"targetClass\": " +
+                            (call.getTargetClass() != null ? "\"" + call.getTargetClass() + "\"" : "null") +
+                            ", \"targetMethod\": \"" + call.getTargetMethod() + "\", \"line\": " + call.getLineNumber() + "}")
+                    .collect(Collectors.joining(",\n")));
+            sb.append("\n      ]");
+        }
 
+        sb.append("\n    }");
         return sb.toString();
     }
 }

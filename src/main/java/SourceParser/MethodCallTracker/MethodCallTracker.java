@@ -1,4 +1,4 @@
-package MethodCallTracker;
+package SourceParser.MethodCallTracker;
 
 import SourceParser.Lexer.Lexer;
 import SourceParser.Model.MethodCall;
