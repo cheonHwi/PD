@@ -9,7 +9,7 @@ public class MethodInfo {
     String methodName;
     String returnType;
     List<Parameter> parameters;
-    List<MethodCall> methodCalls;  // 이 메서드가 호출하는 다른 메서드들
+    List<MethodCall> methodCalls;
     int lineNumber;
 
     public MethodInfo() {
@@ -47,6 +47,14 @@ public class MethodInfo {
 
     public void setLineNumber(int lineNumber) {
         this.lineNumber = lineNumber;
+    }
+
+    public List<MethodCall> getMethodCalls() {
+        return methodCalls;
+    }
+
+    public int getLineNumber() {
+        return lineNumber;
     }
 
     @Override
