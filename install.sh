@@ -3,7 +3,7 @@
 set -e
 
 VERSION="1.0.0"
-GITHUB_REPO="https://github.com/cheonHwi/PD"
+GITHUB_REPO="cheonHwi/PD"
 JAR_URL="https://github.com/$GITHUB_REPO/releases/download/v${VERSION}/sourceparser.jar"
 
 INSTALL_DIR="$HOME/.local/bin"
