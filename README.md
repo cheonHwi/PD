@@ -1,6 +1,9 @@
 # PD
 Program Director - 우아한 테크코스 오픈 미션
 
+## 설치방법
+- 📦 [설치 가이드](install-guide.md)
+
 ## 📋 프로젝트 개요
 
 ### 목표
@@ -21,7 +24,7 @@ Java 프로젝트의 소스코드를 분석하여 파일 간 의존성과 메서
 ```
 소스 파일들
     ↓
-FileAnalyzer (디렉토리 순회)
+Analyzer (디렉토리 순회)
     ↓
 ClassParser (클래스 정보 파싱)
     ↓
@@ -76,7 +79,7 @@ project_graph.json
 - `parseClassName()`: 클래스명 추출
 - `parseMethods()`: 메서드 목록 파싱
 
-#### 2. FileAnalyzer
+#### 2. Analyzer
 **역할:**
 - 프로젝트 디렉토리 순회
 - Java 파일 필터링 및 읽기
@@ -118,7 +121,7 @@ project_graph.json
 - [ ] ClassParser 테스트 작성
 
 ### Phase 3: 파일 분석
-- [ ] FileAnalyzer 구현
+- [ ] Analyzer 구현
 - [ ] 디렉토리 순회 및 파일 파싱
 - [ ] 통합 테스트
 

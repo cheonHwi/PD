@@ -25,7 +25,7 @@ public class Lexer {
     }
 
     public Token getCurrentToken() {
-        if (isAtEnd()) return tokens.getLast();
+        if (isAtEnd()) return tokens.get(tokens.size() - 1);
         return tokens.get(position);
     }
 

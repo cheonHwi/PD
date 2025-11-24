@@ -1,12 +1,31 @@
 plugins {
     id 'java'
+    id 'application'
 }
 
-group = 'org.example'
-version = '1.0-SNAPSHOT'
+group = 'com.sourceparser'
+version = '1.0.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
 
 repositories {
     mavenCentral()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java']
+        }
+    }
+    test {
+        java {
+            srcDirs = ['src/test/java']
+        }
+    }
 }
 
 dependencies {
@@ -15,6 +34,58 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+application {
+    mainClass = 'Main'
+}
+
+
+jar {
+    archiveBaseName = 'sourceparser'
+    archiveVersion = ''
+
+    manifest {
+        attributes(
+                'Main-Class': 'Main',
+                'Implementation-Title': 'SourceParser',
+                'Implementation-Version': version
+        )
+    }
+
+    exclude '**/Test/**'
+    exclude '**/*Test.class'
+}
+
 test {
     useJUnitPlatform()
+
+    // 테스트 결과 출력
+    testLogging {
+        events "passed", "skipped", "failed"
+        showStandardStreams = false
+    }
+}
+
+tasks.register('buildNoTest') {
+    dependsOn 'classes'
+    dependsOn 'jar'
+    description = 'Build without running tests'
+    group = 'build'
+}
+
+// clean 태스크
+clean {
+    delete 'project-analysis.json'
+}
+
+tasks.register('analyze', JavaExec) {
+    group = 'application'
+    description = 'Analyze a project (usage: gradle analyze -Ppath=/project/path)'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = application.mainClass
+
+    if (project.hasProperty('path')) {
+        args project.property('path')
+    } else {
+        args '.'
+    }
 }
