@@ -35,6 +35,8 @@ public class Parser {
         List<String> imports = parseImports();
         imports.forEach(imp -> classInfo.getImports().add(imp));
 
+        skipAnnotations();
+
         classInfo.setAccessModifier(getClassAccessModifier());
 
         classInfo.setModifiers(getClassModifiers());
@@ -159,6 +161,7 @@ public class Parser {
         lexer.moveForward();
 
         while (!lexer.check(TokenType.RBRACE) && !lexer.isAtEnd()) {
+            skipAnnotations();
             Token accessModifier = lexer.matchesAny(
                     TokenType.PUBLIC, TokenType.PRIVATE, TokenType.PROTECTED
             );
@@ -276,4 +279,37 @@ public class Parser {
 
         skipMethodBody();
     }
+
+    private void skipAnnotations() {
+        while (lexer.check(TokenType.AT)) {
+            lexer.moveForward();
+
+            if (lexer.getCurrentToken().getType() == TokenType.UNKNOWN) {
+                lexer.moveForward();
+            }
+
+            if (lexer.check(TokenType.LPAREN)) {
+                skipAnnotationParameters();
+            }
+        }
+    }
+
+    private void skipAnnotationParameters() {
+        if (!lexer.check(TokenType.LPAREN)) {
+            return;
+        }
+
+        int parenDepth = 1;
+        lexer.moveForward();
+
+        while (parenDepth > 0 && !lexer.isAtEnd()) {
+            if (lexer.check(TokenType.LPAREN)) {
+                parenDepth++;
+            } else if (lexer.check(TokenType.RPAREN)) {
+                parenDepth--;
+            }
+            lexer.moveForward();
+        }
+    }
+
 }

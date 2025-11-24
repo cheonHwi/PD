@@ -1,10 +1,12 @@
-
 import Analyzer.DependencyResolver;
+import Analyzer.ParseResult;
 import Analyzer.ProjectAnalyzer;
-import Serializer.JsonSerializer;
 import SourceParser.Model.ClassInfo;
+import Serializer.JsonSerializer;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -42,7 +44,6 @@ public class Main {
         long startTime = System.currentTimeMillis();
 
         try {
-            // 경로 검증
             File projectDir = new File(path);
             if (!projectDir.exists()) {
                 System.err.println("✗ Error: Path does not exist: " + path);
@@ -54,10 +55,8 @@ public class Main {
                 System.exit(1);
             }
 
-            // 프로젝트명 추출
             String projectName = extractProjectName(projectDir, path);
 
-            // 작업 디렉토리 변경
             String originalDir = System.getProperty("user.dir");
             System.setProperty("user.dir", projectDir.getAbsolutePath());
 
@@ -65,17 +64,19 @@ public class Main {
             System.out.println("📦 Project: " + projectName);
             System.out.println();
 
-            // 1. 프로젝트 분석
             System.out.print("🔍 Parsing files... ");
             ProjectAnalyzer projectAnalyzer = new ProjectAnalyzer(true);
             List<ClassInfo> classes = projectAnalyzer.analyzeProject();
 
-            if (classes.isEmpty()) {
+            int successCount = projectAnalyzer.getSuccessCount();
+            int failureCount = projectAnalyzer.getFailureCount();
+            int totalCount = successCount + failureCount;
+
+            if (classes.isEmpty() && failureCount == 0) {
                 System.out.println("\n⚠ No Java files found");
                 System.exit(0);
             }
 
-            // 2. 의존성 분석
             System.out.print("🔗 Resolving dependencies... ");
             DependencyResolver resolver = new DependencyResolver();
             resolver.resolveDependencies(classes);
@@ -85,15 +86,12 @@ public class Main {
                     .sum();
             System.out.println("✓");
 
-            // 3. JSON 생성
             System.out.print("📝 Generating JSON... ");
             JsonSerializer serializer = new JsonSerializer();
             String json = serializer.serialize(classes);
 
-            // 원래 위치로 복귀
             System.setProperty("user.dir", originalDir);
 
-            // 파일명 생성: 프로젝트명-현재시간.json
             String timestamp = LocalDateTime.now()
                     .format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HHmmss"));
             String outputFileName = projectName + "-" + timestamp + ".json";
@@ -101,23 +99,54 @@ public class Main {
             serializer.saveToFile(json, outputFileName);
             System.out.println("✓");
 
-            // 결과 요약
+            if (failureCount > 0) {
+                String logFileName = projectName + "-" + timestamp + ".log";
+                writeLogFile(logFileName, projectAnalyzer.getFailures());
+            }
+
             long duration = (System.currentTimeMillis() - startTime) / 1000;
             System.out.println();
             System.out.println("✨ Analysis complete!");
             System.out.println();
             System.out.println("📊 Statistics:");
-            System.out.println("   Project:      " + projectName);
-            System.out.println("   Classes:      " + classes.size());
+            System.out.println("   Project:         " + projectName);
+            System.out.println("   Total files:     " + totalCount);
+            System.out.println("   ✓ Success:       " + successCount);
+
+            if (failureCount > 0) {
+                System.out.println("   ✗ Failed:        " + failureCount);
+            }
+
+            System.out.println("   Classes parsed:  " + classes.size());
 
             int totalMethods = classes.stream()
                     .mapToInt(c -> c.getMethods().size())
                     .sum();
-            System.out.println("   Methods:      " + totalMethods);
-            System.out.println("   Dependencies: " + totalDeps);
-            System.out.println("   Time:         " + duration + "s");
+            System.out.println("   Methods:         " + totalMethods);
+            System.out.println("   Dependencies:    " + totalDeps);
+            System.out.println("   Time:            " + duration + "s");
             System.out.println();
             System.out.println("📄 Output: " + new File(outputFileName).getAbsolutePath());
+
+            if (failureCount > 0) {
+                System.out.println();
+                System.out.println("⚠️  Failed to parse " + failureCount + " file(s):");
+                List<ParseResult> failures = projectAnalyzer.getFailures();
+
+                int displayCount = Math.min(5, failures.size());
+                for (int i = 0; i < displayCount; i++) {
+                    ParseResult failure = failures.get(i);
+                    System.out.println("   • " + failure.getFileName() + ": " + failure.getErrorMessage());
+                }
+
+                if (failures.size() > 5) {
+                    System.out.println("   ... and " + (failures.size() - 5) + " more");
+                }
+
+                String logFileName = projectName + "-" + timestamp + ".log";
+                System.out.println();
+                System.out.println("📋 Full error log: " + new File(logFileName).getAbsolutePath());
+            }
 
         } catch (Exception e) {
             System.err.println("\n✗ Error: " + e.getMessage());
@@ -128,19 +157,44 @@ public class Main {
         }
     }
 
+    private static void writeLogFile(String logFileName, List<ParseResult> failures) {
+        try (FileWriter writer = new FileWriter(logFileName)) {
+            writer.write("SourceParser Error Log\n");
+            writer.write("======================\n\n");
+            writer.write("Generated: " + LocalDateTime.now().format(
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + "\n\n");
+            writer.write("Failed Files: " + failures.size() + "\n\n");
+
+            for (int i = 0; i < failures.size(); i++) {
+                ParseResult failure = failures.get(i);
+                writer.write((i + 1) + ". " + failure.getFileName() + "\n");
+                writer.write("   Path: " + failure.getFilePath() + "\n");
+                writer.write("   Error: " + failure.getErrorMessage() + "\n");
+
+                if (failure.getException() != null) {
+                    writer.write("   Stack trace:\n");
+                    Exception e = failure.getException();
+                    for (StackTraceElement element : e.getStackTrace()) {
+                        writer.write("     " + element.toString() + "\n");
+                    }
+                }
+                writer.write("\n");
+            }
+        } catch (IOException e) {
+            System.err.println("⚠️  Could not write log file: " + e.getMessage());
+        }
+    }
+
     private static String extractProjectName(File projectDir, String originalPath) {
         String projectName;
 
-        // "." 또는 "./" 입력 시
         if (originalPath.equals(".") || originalPath.equals("./")) {
             try {
                 projectName = projectDir.getCanonicalFile().getName();
             } catch (Exception e) {
                 projectName = projectDir.getAbsoluteFile().getName();
             }
-        }
-        // 상대 경로 또는 절대 경로
-        else {
+        } else {
             projectName = projectDir.getName();
 
             if (projectName.isEmpty()) {
@@ -152,10 +206,8 @@ public class Main {
             }
         }
 
-        // 파일명에 사용할 수 없는 문자 제거
         projectName = sanitizeFileName(projectName);
 
-        // 여전히 비어있으면 기본값
         if (projectName.isEmpty()) {
             projectName = "project";
         }
@@ -164,7 +216,6 @@ public class Main {
     }
 
     private static String sanitizeFileName(String name) {
-        // 파일명에 사용할 수 없는 문자 제거
         return name.replaceAll("[\\\\/:*?\"<>|]", "_");
     }
 
@@ -183,5 +234,6 @@ public class Main {
         System.out.println();
         System.out.println("Output:");
         System.out.println("  <projectname>-<timestamp>.json    Analysis result");
+        System.out.println("  <projectname>-<timestamp>.log     Error log (if any failures)");
     }
 }

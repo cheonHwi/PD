@@ -48,6 +48,7 @@ public class Tokenizer {
             case '=': addToken(TokenType.ASSIGN, "="); break;
             case '/': addToken(TokenType.SLASH, "/"); break;
             case '?': addToken(TokenType.QUESTION, "?"); break;
+            case '@': addToken(TokenType.AT, "@"); break;
 
             case '.':
                 if (peek() == '.' && peekNext() == '.') {
